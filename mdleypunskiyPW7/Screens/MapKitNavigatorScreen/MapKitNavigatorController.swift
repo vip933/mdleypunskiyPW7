@@ -14,6 +14,8 @@ class MapKitNavigatorController: UIViewController {
     var locationManager = CLLocationManager()
     var buttonStackView = UIStackView()
     var textStack = UIStackView()
+    var fromAddres = ""
+    var toAddres = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,7 +40,12 @@ class MapKitNavigatorController: UIViewController {
         return mapView
     }()
     
-    private let startLocation: UITextField = {
+    @objc
+    public func goButtonWasPressed() {
+        print("go button was pressed")
+    }
+    
+    public let startLocation: UITextField = {
         let control = UITextField()
         control.backgroundColor = UIColor.lightGray
         control.textColor = UIColor.white
@@ -58,7 +65,7 @@ class MapKitNavigatorController: UIViewController {
         return control
     }()
     
-    private let endLocation: UITextField = {
+    public let endLocation: UITextField = {
         let control = UITextField()
         control.backgroundColor = UIColor.lightGray
         control.textColor = UIColor.white
@@ -89,6 +96,15 @@ class MapKitNavigatorController: UIViewController {
       self.view.endEditing(true)
     }
     
+    @objc
+    private func clearButtonWasPressed() {
+        [startLocation, endLocation].forEach { textField in
+            textField.text = ""
+        }
+        
+        print("clear button was pressed")
+    }
+    
     private func setupTextStack() {
         textStack.axis = .vertical
         view.addSubview(textStack)
@@ -101,6 +117,8 @@ class MapKitNavigatorController: UIViewController {
         }
     }
     
+    public var goButton: UIButton?
+    public var clearButton: UIButton?
     private func configureUI() {
         self.view.addSubview(mapView)
         mapView.pin(to: self.view)
@@ -113,14 +131,23 @@ class MapKitNavigatorController: UIViewController {
         buttonStackView.distribution = .equalCentering
         buttonStackView.spacing = 20
         
-        let buttonView1 = BottomButton(text: "Fuck u", color: .blue)
+        let buttonView1 = BottomButton(text: "Go", color: .green)
         buttonView1.setWidth(to: (Double(UIScreen.main.bounds.width) - 70) / 2)
         buttonView1.setHeight(to: 50)
-        let buttonView2 = BottomButton(text: "hello2", color: .red)
+        buttonView1.button.addTarget(self, action: #selector(goButtonWasPressed), for: .touchUpInside)
+        buttonView1.button.isEnabled = false
+        buttonView1.button.setTitleColor(.gray, for: .disabled)
+        
+        let buttonView2 = BottomButton(text: "Clear", color: .red)
         buttonView2.setWidth(to: (Double(UIScreen.main.bounds.width) - 70) / 2)
-        buttonView1.setHeight(to: 50)
+        buttonView2.setHeight(to: 50)
+        buttonView2.button.addTarget(self, action: #selector(clearButtonWasPressed), for: .touchUpInside)
+        buttonView2.button.isEnabled = false
+        buttonView2.button.setTitleColor(.gray, for: .disabled)
         
         buttonStackView.addArrangedSubview(buttonView1)
         buttonStackView.addArrangedSubview(buttonView2)
+        goButton = buttonView1.button
+        clearButton = buttonView2.button
     }
 }

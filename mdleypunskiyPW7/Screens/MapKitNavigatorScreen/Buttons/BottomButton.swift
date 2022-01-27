@@ -8,7 +8,12 @@
 import UIKit
 
 final class BottomButton: UIView {
-    private let button = UIButton(type: .system)
+    private let _button = UIButton(type: .system)
+    var button: UIButton {
+        get {
+            return _button
+        }
+    }
     private var text: String?
     private var color: UIColor?
     
@@ -24,12 +29,13 @@ final class BottomButton: UIView {
     }
     
     private func setup() {
-        button.setTitle(text, for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = color
-        button.layer.cornerRadius = 20
-        button.layer.borderWidth = 2
-        self.addSubview(button)
-        button.pin(to: self)
+        _button.setTitle(text, for: .normal)
+        _button.setTitleColor(.white, for: .normal)
+        _button.backgroundColor = color
+        _button.layer.cornerRadius = 20
+        _button.layer.borderWidth = 2
+        _button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 25)
+        self.addSubview(_button)
+        _button.pin(to: self)
     }
 }
