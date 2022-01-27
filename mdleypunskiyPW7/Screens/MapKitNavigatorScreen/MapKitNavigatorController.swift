@@ -9,7 +9,7 @@ import UIKit
 import CoreLocation
 import MapKit
 
-class MapKitNavigatorController: UIViewController {
+class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
     
     var locationManager = CLLocationManager()
     var buttonStackView = UIStackView()
@@ -23,6 +23,7 @@ class MapKitNavigatorController: UIViewController {
         locationManager.requestWhenInUseAuthorization()
         setupTextStack()
         setupTapGestures()
+        mapView.delegate = self
         
     }
     
@@ -42,7 +43,43 @@ class MapKitNavigatorController: UIViewController {
     
     @objc
     public func goButtonWasPressed() {
+        guard
+            let first = startLocation.text,
+            let second = endLocation.text,
+            first != second
+        else {
+            return
+        }
+        let group = DispatchGroup()
+        group.enter()
+        getCoordinatesFrom(address: first, completion: {
+            [weak self] coords, _ in
+            if let coords = coords {
+                self?.coordinates.append(coords)
+            }
+            group.leave()
+        })
+        
+        group.enter()
+        getCoordinatesFrom(address: second, completion: {
+            [weak self] coords, _ in
+            if let coords = coords {
+                self?.coordinates.append(coords)
+            }
+            group.leave()
+        })
+        
+        group.notify(queue: .main) {
+            DispatchQueue.main.async {
+                [weak self] in self?.buildPath()
+            }
+        }
+        
         print("go button was pressed")
+    }
+    
+    private func buildPath() {
+        self.mapView.showRouteOnMap(pickupCoordinate: coordinates[0], destinationCoordinate: coordinates[1])
     }
     
     public let startLocation: UITextField = {
@@ -101,7 +138,9 @@ class MapKitNavigatorController: UIViewController {
         [startLocation, endLocation].forEach { textField in
             textField.text = ""
         }
-        
+        coordinates.removeAll()
+        mapView.removeOverlays(self.mapView.overlays)
+        mapView.removeAnnotations(self.mapView.annotations)
         print("clear button was pressed")
     }
     
@@ -149,5 +188,30 @@ class MapKitNavigatorController: UIViewController {
         buttonStackView.addArrangedSubview(buttonView2)
         goButton = buttonView1.button
         clearButton = buttonView2.button
+    }
+    
+    var coordinates: [CLLocationCoordinate2D] = []
+    private func getCoordinatesFrom(
+        address: String,
+        completion: @escaping(
+            _ coordinates: CLLocationCoordinate2D?,
+            _ error: Error?
+        ) -> ()) {
+        DispatchQueue.global(qos: .background).async {
+            CLGeocoder().geocodeAddressString(address) {
+                completion($0?.first?.location?.coordinate, $1) }
+        }
+    }
+    
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+
+        if let routePolyline = overlay as? MKPolyline {
+            let renderer = MKPolylineRenderer(polyline: routePolyline)
+            renderer.strokeColor = UIColor.blue.withAlphaComponent(0.9)
+            renderer.lineWidth = 5
+            return renderer
+        }
+
+        return MKOverlayRenderer()
     }
 }

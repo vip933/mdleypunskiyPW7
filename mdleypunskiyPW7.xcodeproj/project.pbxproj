@@ -18,6 +18,7 @@
 		B526D45827A2C01C0010023A /* UIView+Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B526D45727A2C01C0010023A /* UIView+Pin.swift */; };
 		B526D45D27A2C94A0010023A /* BottomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B526D45C27A2C94A0010023A /* BottomButton.swift */; };
 		B526D46027A2DCAE0010023A /* MapKitNavigator+UITextFieldDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B526D45F27A2DCAE0010023A /* MapKitNavigator+UITextFieldDelegate.swift */; };
+		B526D46227A308890010023A /* MapKitNavigator+buildPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = B526D46127A308890010023A /* MapKitNavigator+buildPath.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 		B526D45727A2C01C0010023A /* UIView+Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIView+Pin.swift"; sourceTree = "<group>"; };
 		B526D45C27A2C94A0010023A /* BottomButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomButton.swift; sourceTree = "<group>"; };
 		B526D45F27A2DCAE0010023A /* MapKitNavigator+UITextFieldDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapKitNavigator+UITextFieldDelegate.swift"; sourceTree = "<group>"; };
+		B526D46127A308890010023A /* MapKitNavigator+buildPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapKitNavigator+buildPath.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +112,7 @@
 			isa = PBXGroup;
 			children = (
 				B526D45F27A2DCAE0010023A /* MapKitNavigator+UITextFieldDelegate.swift */,
+				B526D46127A308890010023A /* MapKitNavigator+buildPath.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -184,6 +187,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B526D45127A2BC180010023A /* MapKitNavigatorInteractor.swift in Sources */,
+				B526D46227A308890010023A /* MapKitNavigator+buildPath.swift in Sources */,
 				B526D46027A2DCAE0010023A /* MapKitNavigator+UITextFieldDelegate.swift in Sources */,
 				B526D44F27A2BBFD0010023A /* MapKitNavigatorPresenter.swift in Sources */,
 				B526D43727A2B8640010023A /* AppDelegate.swift in Sources */,
