@@ -14,9 +14,11 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
     
     var locationManager = CLLocationManager()
     var buttonStackView = UIStackView()
+    var scaleButtonsStackView = UIStackView()
     var textStack = UIStackView()
     var fromAddres = ""
     var toAddres = ""
+    var scaleValue: Float = 10.0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,7 +27,8 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
         setupTextStack()
         setupTapGestures()
         setupDistanceView()
-        
+        setupPlusMinusButtons()
+        scaleValue = mapView.mapWindow.map.cameraPosition.zoom
     }
     
     private let mapView: YMKMapView = {
@@ -37,9 +40,9 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
         let mapKit = YMKMapKit.sharedInstance()
         let userLocationLayer = mapKit.createUserLocationLayer(with: mapView.mapWindow)
         userLocationLayer.setVisibleWithOn(true)
+        
+        // Иконка пользователя направлена в сторону куда направлен телефон пользователя.
         userLocationLayer.isHeadingEnabled = true
-        //let trafficLayer = mapKit.createTrafficLayer(with: mapView.mapWindow)
-        //trafficLayer.setTrafficVisibleWithOn(true)
         return mapView
     }()
     
@@ -95,7 +98,7 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
         let latitudeMid = (coordinates[0].latitude + coordinates[1].latitude) / 2
         let longitudeMid = (coordinates[0].longitude + coordinates[1].longitude) / 2
         mapView.mapWindow.map.move(
-                    with: YMKCameraPosition(target: YMKPoint(latitude: latitudeMid, longitude: longitudeMid), zoom: 5, azimuth: 0, tilt: 0))
+                    with: YMKCameraPosition(target: YMKPoint(latitude: latitudeMid, longitude: longitudeMid), zoom: scaleValue, azimuth: 0, tilt: 0))
                 
                 let requestPoints : [YMKRequestPoint] = [
                     YMKRequestPoint(point: YMKPoint(latitude: coordinates[0].latitude, longitude: coordinates[0].longitude), type: .waypoint, pointContext: nil),
@@ -205,6 +208,60 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
         coordinates.removeAll()
         mapView.mapWindow.map.mapObjects.clear()
         print("clear button was pressed")
+    }
+    
+    public var plusButton: UIButton?
+    public var minusButton: UIButton?
+    private func setupPlusMinusButtons() {
+        scaleButtonsStackView.axis = .vertical
+        scaleButtonsStackView.spacing = 0
+        view.addSubview(scaleButtonsStackView)
+        scaleButtonsStackView.layer.cornerRadius = 23
+        scaleButtonsStackView.backgroundColor = .lightGray
+        scaleButtonsStackView.pin(to: textStack, [.bottom: -105, .right: 0])
+        
+        let buttonView1 = PlusMinusButton(text: "+")
+        let buttonView2 = PlusMinusButton(text: "-")
+        
+        scaleButtonsStackView.addArrangedSubview(buttonView1)
+        scaleButtonsStackView.addArrangedSubview(buttonView2)
+        
+        plusButton = buttonView1.button
+        minusButton = buttonView2.button
+        plusButton?.addTarget(self, action: #selector(plusButtonWasPressed), for: .touchUpInside)
+        minusButton?.addTarget(self, action: #selector(minusButtonWasPressed), for: .touchUpInside)
+        
+        buttonView1.setWidth(to: 50)
+        buttonView2.setWidth(to: 50)
+        
+        buttonView1.setHeight(to: 50)
+        buttonView2.setHeight(to: 50)
+    }
+    
+    @objc
+    private func plusButtonWasPressed() {
+        print("plus button was pressed")
+        scaleValue += 0.5
+        var point: YMKPoint
+        if let location = locationManager.location {
+            point = YMKPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+        } else {
+            point = mapView.mapWindow.map.cameraPosition.target
+        }
+        mapView.mapWindow.map.move(with: YMKCameraPosition(target: point, zoom: scaleValue, azimuth: 0, tilt: 0))
+    }
+    
+    @objc
+    private func minusButtonWasPressed() {
+        print("minus button was pressed")
+        scaleValue -= 0.5
+        var point: YMKPoint
+        if let location = locationManager.location {
+            point = YMKPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+        } else {
+            point = mapView.mapWindow.map.cameraPosition.target
+        }
+        mapView.mapWindow.map.move(with: YMKCameraPosition(target: point, zoom: scaleValue, azimuth: 0, tilt: 0))
     }
     
     private func setupTextStack() {

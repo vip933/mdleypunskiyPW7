@@ -19,6 +19,7 @@
 		B526D46027A2DCAE0010023A /* MapKitNavigator+UITextFieldDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B526D45F27A2DCAE0010023A /* MapKitNavigator+UITextFieldDelegate.swift */; };
 		B598C04327A415B3004B896E /* MapKitNavigatorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B598C04227A415B3004B896E /* MapKitNavigatorController.swift */; };
 		B598C04527A4496F004B896E /* YandexMapKitAPIKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B598C04427A4496F004B896E /* YandexMapKitAPIKey.swift */; };
+		B598C04727A4503F004B896E /* PlusMinusButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B598C04627A4503F004B896E /* PlusMinusButton.swift */; };
 		EAB0245E2753D83334E0AE7A /* Pods_mdleypunskiyPW7.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0133A967BE5CDBC000952A02 /* Pods_mdleypunskiyPW7.framework */; };
 /* End PBXBuildFile section */
 
@@ -38,6 +39,7 @@
 		B526D45F27A2DCAE0010023A /* MapKitNavigator+UITextFieldDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MapKitNavigator+UITextFieldDelegate.swift"; sourceTree = "<group>"; };
 		B598C04227A415B3004B896E /* MapKitNavigatorController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MapKitNavigatorController.swift; path = Buttons/MapKitNavigatorController.swift; sourceTree = "<group>"; };
 		B598C04427A4496F004B896E /* YandexMapKitAPIKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YandexMapKitAPIKey.swift; sourceTree = "<group>"; };
+		B598C04627A4503F004B896E /* PlusMinusButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlusMinusButton.swift; sourceTree = "<group>"; };
 		CE9C391CD345A07B9B038AE9 /* Pods-mdleypunskiyPW7.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-mdleypunskiyPW7.debug.xcconfig"; path = "Target Support Files/Pods-mdleypunskiyPW7/Pods-mdleypunskiyPW7.debug.xcconfig"; sourceTree = "<group>"; };
 		E20ED78A7B393E0E7DAC5FC3 /* Pods-mdleypunskiyPW7.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-mdleypunskiyPW7.release.xcconfig"; path = "Target Support Files/Pods-mdleypunskiyPW7/Pods-mdleypunskiyPW7.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -120,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				B526D45C27A2C94A0010023A /* BottomButton.swift */,
+				B598C04627A4503F004B896E /* PlusMinusButton.swift */,
 			);
 			path = Buttons;
 			sourceTree = "<group>";
@@ -256,6 +259,7 @@
 			files = (
 				B598C04327A415B3004B896E /* MapKitNavigatorController.swift in Sources */,
 				B526D45127A2BC180010023A /* MapKitNavigatorInteractor.swift in Sources */,
+				B598C04727A4503F004B896E /* PlusMinusButton.swift in Sources */,
 				B526D46027A2DCAE0010023A /* MapKitNavigator+UITextFieldDelegate.swift in Sources */,
 				B526D44F27A2BBFD0010023A /* MapKitNavigatorPresenter.swift in Sources */,
 				B526D43727A2B8640010023A /* AppDelegate.swift in Sources */,
