@@ -16,6 +16,7 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
     var buttonStackView = UIStackView()
     var scaleButtonsStackView = UIStackView()
     var textStack = UIStackView()
+    var vehiclePanel = UISegmentedControl(items: ["car", "bicycle", "masstransit"])
     var fromAddres = ""
     var toAddres = ""
     var scaleValue: Float = 10.0
@@ -28,6 +29,7 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
         setupTapGestures()
         setupDistanceView()
         setupPlusMinusButtons()
+        setupVehicleChoicePanel()
         scaleValue = mapView.mapWindow.map.cameraPosition.zoom
     }
     
@@ -86,6 +88,16 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
         print("go button was pressed")
     }
     
+    private func setupVehicleChoicePanel() {
+        view.addSubview(vehiclePanel)
+        vehiclePanel.selectedSegmentIndex = 0
+        vehiclePanel.pin(to: goButton!, [.bottom: 70, .left: 0])
+        vehiclePanel.layer.cornerRadius = 20
+        vehiclePanel.setWidth(to: Double(UIScreen.main.bounds.width) - 50)
+        vehiclePanel.setHeight(to: 50)
+        vehiclePanel.backgroundColor = .lightGray
+    }
+    
     private let distanceLabel = UILabel()
     private func setupDistanceView() {
         distanceLabel.text = "Distance: 0 km"
@@ -94,31 +106,70 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
     }
     
     var drivingSession: YMKDrivingSession?
+    var bicycleSession: YMKBicycleSession?
+    var masstransitSession: YMKMasstransitSession?
     private func buildPath() {
         let latitudeMid = (coordinates[0].latitude + coordinates[1].latitude) / 2
         let longitudeMid = (coordinates[0].longitude + coordinates[1].longitude) / 2
         mapView.mapWindow.map.move(
-                    with: YMKCameraPosition(target: YMKPoint(latitude: latitudeMid, longitude: longitudeMid), zoom: scaleValue, azimuth: 0, tilt: 0))
-                
-                let requestPoints : [YMKRequestPoint] = [
-                    YMKRequestPoint(point: YMKPoint(latitude: coordinates[0].latitude, longitude: coordinates[0].longitude), type: .waypoint, pointContext: nil),
-                    YMKRequestPoint(point: YMKPoint(latitude: coordinates[1].latitude, longitude: coordinates[1].longitude), type: .waypoint, pointContext: nil),
-                    ]
-                
-                let responseHandler = {(routesResponse: [YMKDrivingRoute]?, error: Error?) -> Void in
-                    if let routes = routesResponse {
-                        self.onRoutesReceived(routes)
-                    } else {
-                        self.onRoutesError(error!)
-                    }
+            with: YMKCameraPosition(target: YMKPoint(latitude: latitudeMid, longitude: longitudeMid), zoom: scaleValue, azimuth: 0, tilt: 0))
+        
+        let requestPoints : [YMKRequestPoint] = [
+            YMKRequestPoint(point: YMKPoint(latitude: coordinates[0].latitude, longitude: coordinates[0].longitude), type: .waypoint, pointContext: nil),
+            YMKRequestPoint(point: YMKPoint(latitude: coordinates[1].latitude, longitude: coordinates[1].longitude), type: .waypoint, pointContext: nil),
+        ]
+        
+        if vehiclePanel.selectedSegmentIndex == 0 {
+            let responseHandler = {(routesResponse: [YMKDrivingRoute]?, error: Error?) -> Void in
+                if let routes = routesResponse {
+                    self.onRoutesReceived(routes)
+                } else {
+                    self.onRoutesError(error!)
                 }
-                
-                let drivingRouter = YMKDirections.sharedInstance().createDrivingRouter()
-                drivingSession = drivingRouter.requestRoutes(
-                    with: requestPoints,
-                    drivingOptions: YMKDrivingDrivingOptions(),
-                    vehicleOptions: YMKDrivingVehicleOptions(),
-                    routeHandler: responseHandler)
+            }
+            let drivingRouter = YMKDirections.sharedInstance().createDrivingRouter()
+            drivingSession = drivingRouter.requestRoutes(
+                with: requestPoints,
+                drivingOptions: YMKDrivingDrivingOptions(),
+                vehicleOptions: YMKDrivingVehicleOptions(),
+                routeHandler: responseHandler)
+        } else if vehiclePanel.selectedSegmentIndex == 1 {
+            let bicycleRouter = YMKTransport.sharedInstance().createBicycleRouter()
+            let listener = {(routeResponse: [YMKBicycleRoute]?, error: Error?) -> Void in
+                if let routes = routeResponse {
+                    self.onBicycleRoutesReceived(routes)
+                } else {
+                    self.onRoutesError(error!)
+                }
+            }
+            bicycleSession = bicycleRouter.requestRoutes(with: requestPoints, routeListener: listener)
+        } else {
+            let masstransitRouter = YMKTransport.sharedInstance().createMasstransitRouter()
+            let masstransitHandler = {(routesResponse: [YMKMasstransitRoute]?, error: Error?) -> Void in
+                if let routes = routesResponse {
+                    self.onMasstransitRoutesReceived(routes)
+                } else {
+                    self.onRoutesError(error!)
+                }
+            }
+            masstransitSession = masstransitRouter.requestRoutes(with: requestPoints, masstransitOptions: YMKMasstransitOptions(), routeHandler: masstransitHandler)
+        }
+    }
+    
+    func onMasstransitRoutesReceived(_ routes: [YMKMasstransitRoute]) {
+        let mapObjects = mapView.mapWindow.map.mapObjects
+        
+        mapObjects.addPolyline(with: routes[0].geometry)
+        
+        distanceLabel.text = "Distance: " + routes[0].metadata.weight.time.text
+    }
+    
+    func onBicycleRoutesReceived(_ routes: [YMKBicycleRoute]) {
+        let mapObjects = mapView.mapWindow.map.mapObjects
+        
+        mapObjects.addPolyline(with: routes[0].geometry)
+        
+        distanceLabel.text = "Distance: " + String(Int(routes[0].weight.distance.value / 1000)) + "Km " + String(Int((routes[0].weight.distance.value / 1000 - Double(Int(routes[0].weight.distance.value / 1000))) * 1000)) + "M"
     }
     
     func onRoutesReceived(_ routes: [YMKDrivingRoute]) {
@@ -132,21 +183,21 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
         
         distanceLabel.text = "Distance: " + String(Int(routes[0].metadata.weight.distance.value / 1000)) + "Km " + String(Int((routes[0].metadata.weight.distance.value / 1000 - Double(Int(routes[0].metadata.weight.distance.value / 1000))) * 1000)) + "M"
     }
-        
-        func onRoutesError(_ error: Error) {
-            let routingError = (error as NSError).userInfo[YRTUnderlyingErrorKey] as! YRTError
-            var errorMessage = "Unknown error"
-            if routingError.isKind(of: YRTNetworkError.self) {
-                errorMessage = "Network error"
-            } else if routingError.isKind(of: YRTRemoteError.self) {
-                errorMessage = "Remote server error"
-            }
-            
-            let alert = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            
-            present(alert, animated: true, completion: nil)
+    
+    func onRoutesError(_ error: Error) {
+        let routingError = (error as NSError).userInfo[YRTUnderlyingErrorKey] as! YRTError
+        var errorMessage = "Unknown error"
+        if routingError.isKind(of: YRTNetworkError.self) {
+            errorMessage = "Network error"
+        } else if routingError.isKind(of: YRTRemoteError.self) {
+            errorMessage = "Remote server error"
         }
+        
+        let alert = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        
+        present(alert, animated: true, completion: nil)
+    }
     
     public let startLocation: UITextField = {
         let control = UITextField()
@@ -196,7 +247,7 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
     
     @objc
     private func didTapView(){
-      self.view.endEditing(true)
+        self.view.endEditing(true)
     }
     
     @objc
