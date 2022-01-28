@@ -38,6 +38,8 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
         let userLocationLayer = mapKit.createUserLocationLayer(with: mapView.mapWindow)
         userLocationLayer.setVisibleWithOn(true)
         userLocationLayer.isHeadingEnabled = true
+        //let trafficLayer = mapKit.createTrafficLayer(with: mapView.mapWindow)
+        //trafficLayer.setTrafficVisibleWithOn(true)
         return mapView
     }()
     
@@ -118,7 +120,13 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
     
     func onRoutesReceived(_ routes: [YMKDrivingRoute]) {
         let mapObjects = mapView.mapWindow.map.mapObjects
-        mapObjects.addPolyline(with: routes[0].geometry)
+        
+        // Found:
+        // https://github.com/yandex/mapkit-ios-demo/issues/101
+        
+        let coloredPolyline = mapObjects.addColoredPolyline()
+        YMKRouteHelper.updatePolyline(withPolyline: coloredPolyline, route: routes[0], style: YMKRouteHelper.createDefaultJamStyle())
+        
         distanceLabel.text = "Distance: " + String(Int(routes[0].metadata.weight.distance.value / 1000)) + "Km " + String(Int((routes[0].metadata.weight.distance.value / 1000 - Double(Int(routes[0].metadata.weight.distance.value / 1000))) * 1000)) + "M"
     }
         
@@ -256,17 +264,5 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
             CLGeocoder().geocodeAddressString(address) {
                 completion($0?.first?.location?.coordinate, $1) }
         }
-    }
-    
-    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-
-        if let routePolyline = overlay as? MKPolyline {
-            let renderer = MKPolylineRenderer(polyline: routePolyline)
-            renderer.strokeColor = UIColor.blue.withAlphaComponent(0.7)
-            renderer.lineWidth = 4
-            return renderer
-        }
-
-        return MKOverlayRenderer()
     }
 }
