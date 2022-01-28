@@ -24,6 +24,7 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
         locationManager.requestWhenInUseAuthorization()
         setupTextStack()
         setupTapGestures()
+        setupDistanceView()
         
     }
     
@@ -42,6 +43,9 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
     
     @objc
     public func goButtonWasPressed() {
+        distanceLabel.text = "Distance: 0 km"
+        coordinates.removeAll()
+        mapView.mapWindow.map.mapObjects.clear()
         guard
             let first = startLocation.text,
             let second = endLocation.text,
@@ -77,6 +81,13 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
         print("go button was pressed")
     }
     
+    private let distanceLabel = UILabel()
+    private func setupDistanceView() {
+        distanceLabel.text = "Distance: 0 km"
+        view.addSubview(distanceLabel)
+        distanceLabel.pin(to: textStack, [.bottom: -25, .left: 0])
+    }
+    
     var drivingSession: YMKDrivingSession?
     private func buildPath() {
         let latitudeMid = (coordinates[0].latitude + coordinates[1].latitude) / 2
@@ -108,7 +119,8 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
     func onRoutesReceived(_ routes: [YMKDrivingRoute]) {
         let mapObjects = mapView.mapWindow.map.mapObjects
         mapObjects.addPolyline(with: routes[0].geometry)
-        }
+        distanceLabel.text = "Distance: " + String(Int(routes[0].metadata.weight.distance.value / 1000)) + "Km " + String(Int((routes[0].metadata.weight.distance.value / 1000 - Double(Int(routes[0].metadata.weight.distance.value / 1000))) * 1000)) + "M"
+    }
         
         func onRoutesError(_ error: Error) {
             let routingError = (error as NSError).userInfo[YRTUnderlyingErrorKey] as! YRTError
@@ -178,6 +190,7 @@ class MapKitNavigatorController: UIViewController, MKMapViewDelegate {
     
     @objc
     private func clearButtonWasPressed() {
+        distanceLabel.text = "Distance: 0 km"
         [startLocation, endLocation].forEach { textField in
             textField.text = ""
         }
